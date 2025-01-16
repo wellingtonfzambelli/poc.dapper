@@ -27,19 +27,19 @@ public sealed class CustomerRepository : ICustomerRepository
                     (
                         name, 
                         email, 
-                        phone, 
+                        phonenumber, 
                         address, 
                         city, 
                         state, 
                         country, 
-                        postal_code, 
-                        created_at
+                        postalcode, 
+                        createdat
                     ) 
                     VALUES 
                     (
                         @Name, 
                         @Email, 
-                        @Phone, 
+                        @PhoneNumber, 
                         @Address, 
                         @City, 
                         @State, 
@@ -63,13 +63,30 @@ public sealed class CustomerRepository : ICustomerRepository
         )).FirstOrDefault();
 
 
-    public Task<int> UpdateAsync(Customer customer)
+    public async Task<int> UpdateAsync(Customer customer)
     {
-        throw new NotImplementedException();
+        var query = @"
+            UPDATE customer
+            SET name = @Name,
+                email = @Email,
+                address = @Address
+            WHERE id = @Id";
+
+        var affectedRows = await _connection.ExecuteAsync(query, new
+        {
+            customer.Name,
+            customer.Email,
+            customer.Address,
+            customer.Id
+        }, transaction: _transaction);
+
+        return affectedRows;
     }
 
-    public Task<int> DeleteAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<int> DeleteAsync(int id) =>
+        await _connection.ExecuteAsync(
+            "DELETE FROM customer WHERE id = @id",
+            new { id },
+            transaction: _transaction
+        );
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using poc.dapper.api.Domain;
-using poc.dapper.api.Repository.UnitOfWork;
+using poc.dapper.api.Services;
 
 namespace poc.dapper.api.Controller;
 
@@ -8,15 +8,15 @@ namespace poc.dapper.api.Controller;
 [ApiController]
 public sealed class CustomerController : ControllerBase
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly ICustomerService _customerService;
 
-    public CustomerController(IUnitOfWork unitOfWork) =>
-        _unitOfWork = unitOfWork;
+    public CustomerController(ICustomerService customerService) =>
+        _customerService = customerService;
 
     [HttpPost]
     public async Task<IActionResult> CreateCustomerAsync([FromBody] Customer customer, CancellationToken cancellation)
     {
-        var result = await _unitOfWork.Customers.AddAsync(customer);
+        var result = await _customerService.CreateCustomerAsync(customer);
 
         if (result > 0)
             return Ok(new { message = "Customer created successfully1." });
@@ -27,9 +27,9 @@ public sealed class CustomerController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetCustomerAsync(int id, CancellationToken cancellation)
     {
-        var customer = await _unitOfWork.Customers.GetByIdAsync(id);
+        var customer = await _customerService.GetCustomerByIdAsync(id);
 
-        if (customer == null)
+        if (customer is null)
             return NotFound("Customer not found1.");
 
         return Ok(customer);
@@ -38,7 +38,7 @@ public sealed class CustomerController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllCustomersAsync(CancellationToken cancellationToken)
     {
-        if (await _unitOfWork.Customers.GetAllAsync()
+        if (await _customerService.GetAllCustomersAsync()
             is var customers && customers is null)
             return NoContent();
 
@@ -47,9 +47,14 @@ public sealed class CustomerController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateCustomerAsync(int id, [FromBody] Customer customer, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateCustomerAsync
+    (
+        int id,
+        [FromBody] Customer customer,
+        CancellationToken cancellationToken
+    )
     {
-        var customerDB = await _unitOfWork.Customers.GetByIdAsync(id);
+        var customerDB = await _customerService.GetCustomerByIdAsync(id);
 
         if (customerDB is null)
             return NotFound();
@@ -63,7 +68,7 @@ public sealed class CustomerController : ControllerBase
         customerDB.PostalCode = customer.PostalCode;
         customerDB.State = customer.State;
 
-        var result = await _unitOfWork.Customers.UpdateAsync(customerDB);
+        var result = await _customerService.UpdateCustomerAsync(customerDB);
 
         if (result > 0)
             return Ok(new { message = "Customer updated successfully." });
@@ -74,14 +79,8 @@ public sealed class CustomerController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCustomerAsync(int id, CancellationToken cancellationToken)
     {
-        var customerDB = await _unitOfWork.Customers.GetByIdAsync(id);
-
-        if (customerDB is null)
-            return NotFound();
-
-        var result = await _unitOfWork.Customers.DeleteAsync(id);
-
-        if (result > 0)
+        if (await _customerService.DeleteAsync(id)
+            is var affectedRows && affectedRows > 0)
             return Ok(new { message = "Customer deleted successfully." });
 
         return BadRequest("Failed to delete customer.");
