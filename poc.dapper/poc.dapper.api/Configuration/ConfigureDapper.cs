@@ -9,7 +9,7 @@ public static class DapperConfig
     {
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-        services.AddSingleton<IDbConnection>(sp =>
+        services.AddTransient<IDbConnection>(sp =>
             new NpgsqlConnection(connectionString));
     }
 }

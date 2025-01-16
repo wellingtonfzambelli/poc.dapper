@@ -27,7 +27,7 @@ public sealed class CustomerController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetCustomerAsync(int id, CancellationToken cancellation)
     {
-        var customer = _unitOfWork.Customers.GetByIdAsync(id);
+        var customer = await _unitOfWork.Customers.GetByIdAsync(id);
 
         if (customer == null)
             return NotFound("Customer not found1.");
@@ -38,11 +38,11 @@ public sealed class CustomerController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllCustomersAsync(CancellationToken cancellationToken)
     {
-        if(await _unitOfWork.Customers.GetAllAsync() 
+        if (await _unitOfWork.Customers.GetAllAsync()
             is var customers && customers is null)
             return NoContent();
 
-        
+
         return Ok(customers);
     }
 
@@ -59,7 +59,7 @@ public sealed class CustomerController : ControllerBase
         customerDB.Country = customer.Country;
         customerDB.Email = customer.Email;
         customerDB.Name = customer.Name;
-        customerDB.Phone = customer.Phone;
+        customerDB.PhoneNumber = customer.PhoneNumber;
         customerDB.PostalCode = customer.PostalCode;
         customerDB.State = customer.State;
 

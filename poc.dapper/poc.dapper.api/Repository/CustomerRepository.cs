@@ -55,10 +55,13 @@ public sealed class CustomerRepository : ICustomerRepository
         );
     }
 
-    public Task<Customer> GetByIdAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<Customer?> GetByIdAsync(int id) =>
+        (await _connection.QueryAsync<Customer>(
+            "SELECT * FROM customer WHERE id = @id LIMIT 1",
+            new { id },
+            transaction: _transaction
+        )).FirstOrDefault();
+
 
     public Task<int> UpdateAsync(Customer customer)
     {
