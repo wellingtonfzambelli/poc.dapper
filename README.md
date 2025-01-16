@@ -2,8 +2,8 @@
 This is a simple PoC in .NET 8 where I demonstrate how to create a basic CRUD application using Dapper for database interactions with a Unit of Work pattern.
 
 # Stacks of this project
-.NET 8   
-Dapper   
-Postgres Database   
-Swagger   
-Visual Studio 2022   
+- .NET 8   
+- Dapper   
+- Postgres Database   
+- Swagger   
+- Visual Studio 2022   
