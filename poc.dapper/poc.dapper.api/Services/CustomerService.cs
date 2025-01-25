@@ -1,6 +1,5 @@
 ﻿using poc.dapper.api.Domain;
 using poc.dapper.api.Repository.UnitOfWork;
-using System.Data.Common;
 
 namespace poc.dapper.api.Services;
 
